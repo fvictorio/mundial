@@ -13,6 +13,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0"
+    "ora": "^2.1.0",
+    "trae": "^1.4.2"
   }
 }

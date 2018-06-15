@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-const axios = require('axios')
+const trae = require('trae')
+const ora = require('ora')
 
 function isToday(match) {
   const today = new Date()
@@ -20,29 +21,39 @@ function printMatch(match) {
 }
 
 async function main() {
-  const matches = (await axios.get('http://worldcup.sfg.io/matches')).data
+  const spinner = ora('Loading matches')
 
-  const todayMatches = matches.filter(isToday)
+  spinner.start()
 
-  const finishedMatches = todayMatches.filter(match => match.status === 'completed')
-  const inProgressMatches = todayMatches.filter(match => match.status === 'in progress')
+  try {
 
-  if (finishedMatches.length) {
-    console.log('FINISHED')
-    console.log('========')
-    finishedMatches.forEach(printMatch)
-  }
-  if (finishedMatches.length && inProgressMatches.length) {
-    console.log('')
-  }
-  if (inProgressMatches.length) {
-    console.log('IN PROGRESS')
-    console.log('===========')
-    inProgressMatches.forEach(printMatch)
-  }
+    const { data: matches } = await trae.get('http://worldcup.sfg.io/matches')
 
-  if (!finishedMatches.length && !inProgressMatches.length) {
-    console.log('No matches today')
+    const todayMatches = matches.filter(isToday)
+
+    const finishedMatches = todayMatches.filter(match => match.status === 'completed')
+    const inProgressMatches = todayMatches.filter(match => match.status === 'in progress')
+
+    spinner.stop()
+
+    if (finishedMatches.length) {
+      console.log('========')
+      finishedMatches.forEach(printMatch)
+    }
+    if (finishedMatches.length && inProgressMatches.length) {
+      console.log('')
+    }
+    if (inProgressMatches.length) {
+      console.log('IN PROGRESS')
+      console.log('===========')
+      inProgressMatches.forEach(printMatch)
+    }
+
+    if (!finishedMatches.length && !inProgressMatches.length) {
+      console.log('No matches today')
+    }
+  } catch(e) {
+    spinner.fail('Ups! Something went wrong.')
   }
 }
 

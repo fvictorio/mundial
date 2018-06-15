@@ -27,13 +27,23 @@ async function main() {
   const finishedMatches = todayMatches.filter(match => match.status === 'completed')
   const inProgressMatches = todayMatches.filter(match => match.status === 'in progress')
 
-  console.log('FINISHED')
-  console.log('========')
-  finishedMatches.forEach(printMatch)
-  console.log('')
-  console.log('IN PROGRESS')
-  console.log('===========')
-  inProgressMatches.forEach(printMatch)
+  if (finishedMatches.length) {
+    console.log('FINISHED')
+    console.log('========')
+    finishedMatches.forEach(printMatch)
+  }
+  if (finishedMatches.length && inProgressMatches.length) {
+    console.log('')
+  }
+  if (inProgressMatches.length) {
+    console.log('IN PROGRESS')
+    console.log('===========')
+    inProgressMatches.forEach(printMatch)
+  }
+
+  if (!finishedMatches.length && !inProgressMatches.length) {
+    console.log('No matches today')
+  }
 }
 
 main()

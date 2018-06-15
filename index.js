@@ -37,6 +37,7 @@ async function main() {
     spinner.stop()
 
     if (finishedMatches.length) {
+      console.log('FINISHED')
       console.log('========')
       finishedMatches.forEach(printMatch)
     }

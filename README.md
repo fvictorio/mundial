@@ -18,7 +18,7 @@ mundial
 npx mundial
 ```
 
-## Parrotsa yit
+## Parrotsay it
 
 ```
 npx mundial | npx parrotsay

@@ -11,3 +11,15 @@ npm install -g mundial
 ```
 mundial
 ```
+
+## Try without installing
+
+```
+npx mundial
+```
+
+## Parrotsa yit
+
+```
+npx mundial | npx parrotsay
+```

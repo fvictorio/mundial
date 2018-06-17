@@ -18,7 +18,7 @@ const printMatch = widths => match => {
   const home = `${hGoals} ${hTeam.padEnd(widths.home, ' ')}`
 
   const { country: aTeam, goals: aGoals } = match.away_team
-  const away = `${aTeam.padStart(widths.home, ' ')} ${aGoals}`
+  const away = `${aTeam.padStart(widths.away, ' ')} ${aGoals}`
 
   console.log(`${home} VS ${away}`)
 }

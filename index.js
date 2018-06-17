@@ -1,15 +1,37 @@
 #!/usr/bin/env node
 const trae = require('trae')
 const ora = require('ora')
+const moment = require('moment')
+
+function sameDay(m1, m2) {
+  return m1.isSame(m2, 'day')
+}
+
+function matchSameDay(match1, match2) {
+  return sameDay(moment(match1.datetime), moment(match2.datetime))
+}
 
 function isToday(match) {
-  const today = new Date()
-  const matchDate = new Date(match.datetime)
+  const today = moment()
+  const matchDate = moment(match.datetime)
+
+  return sameDay(today, matchDate)
+}
+
+function isTomorrow(match) {
+  const tomorrow = moment().add(1, 'days')
+  const matchDate = moment(match.datetime)
+
+  return sameDay(tomorrow, matchDate)
+}
+
+function afterToday(match) {
+  const today = moment()
+  const matchDate = moment(match.datetime)
 
   return (
-    matchDate.getYear() == today.getYear() &&
-    matchDate.getMonth() == today.getMonth() &&
-    matchDate.getDate() == today.getDate()
+    matchDate.year() == today.year() &&
+    matchDate.dayOfYear() > today.dayOfYear()
   )
 }
 
@@ -21,6 +43,19 @@ const printMatch = widths => match => {
   const away = `${aTeam.padStart(widths.home, ' ')} ${aGoals}`
 
   console.log(`${home} VS ${away}`)
+}
+
+const printMatchTime = widths => match => {
+  const { datetime } = match
+  const hour = moment(datetime).format('HH:mm')
+
+  const { country: hTeam } = match.home_team
+  const home = `${hTeam.padEnd(widths.home, ' ')}`
+
+  const { country: aTeam } = match.away_team
+  const away = `${aTeam.padStart(widths.home, ' ')}`
+
+  console.log(`${hour} ${home} VS ${away}`)
 }
 
 const calculateWidths = matches =>
@@ -69,6 +104,27 @@ async function main() {
     if (inProgressMatches.length) {
       console.log('IN PRO'.padStart(widths.home + 5, ' ') + 'GRESS')
       inProgressMatches.forEach(printMatch(widths))
+    }
+
+    if (!inProgressMatches.length) {
+      const matchesAfterToday = matches
+        .filter(afterToday)
+        .sort((m1, m2) => new Date(m1.datetime) - new Date(m2.datetime))
+
+      const nextMatch = matchesAfterToday[0]
+
+      const nextMatches = matchesAfterToday
+        .filter(match => matchSameDay(match, nextMatch))
+
+      const widths = calculateWidths(nextMatches)
+
+      const date = moment(nextMatch.datetime)
+      const dateStr = isTomorrow(nextMatch) ? 'Tomorrow' : date.format('MMM DD')
+
+      console.log('')
+      console.log(`Next Matches (${dateStr}):`)
+
+      nextMatches.forEach(printMatchTime(widths))
     }
 
     if (!finishedMatches.length && !inProgressMatches.length) {

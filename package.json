@@ -20,6 +20,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "moment": "^2.22.2",
     "ora": "^2.1.0",
     "trae": "^1.4.2"
   },

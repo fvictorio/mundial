@@ -53,9 +53,8 @@ const printMatchTime = widths => match => {
   const home = `${hTeam.padEnd(widths.home, ' ')}`
 
   const { country: aTeam } = match.away_team
-  const away = `${aTeam.padStart(widths.home, ' ')}`
 
-  console.log(`${hour} ${home} VS ${away}`)
+  console.log(`${hour} ${home} VS ${aTeam}`)
 }
 
 const calculateWidths = matches =>
@@ -113,8 +112,9 @@ async function main() {
 
       const nextMatch = matchesAfterToday[0]
 
-      const nextMatches = matchesAfterToday
-        .filter(match => matchSameDay(match, nextMatch))
+      const nextMatches = matchesAfterToday.filter(match =>
+        matchSameDay(match, nextMatch),
+      )
 
       const widths = calculateWidths(nextMatches)
 

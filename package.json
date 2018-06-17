@@ -7,13 +7,25 @@
     "mundial": "index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "format": "prettier --write '**/*.{js,md,json}'",
+    "format:changed": "pretty-quick",
+    "precommit": "pretty-quick --staged"
   },
-  "keywords": [],
+  "keywords": [
+    "futbol",
+    "football",
+    "world-cup"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "ora": "^2.1.0",
     "trae": "^1.4.2"
+  },
+  "devDependencies": {
+    "husky": "^0.14.3",
+    "prettier": "^1.13.5",
+    "pretty-quick": "^1.6.0"
   }
 }

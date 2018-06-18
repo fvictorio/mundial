@@ -3,6 +3,14 @@ const trae = require('trae')
 const ora = require('ora')
 const moment = require('moment')
 
+const argv = process.argv.slice(2)
+
+const config = { debug: argv.includes('--debug') }
+
+main(config)
+
+// -------------------------------------
+
 function sameDay(m1, m2) {
   return m1.isSame(m2, 'day')
 }
@@ -25,14 +33,12 @@ function isTomorrow(match) {
   return sameDay(tomorrow, matchDate)
 }
 
-function afterToday(match) {
-  const today = moment()
-  const matchDate = moment(match.datetime)
+function isAfter(match, date) {
+  return moment(match.datetime).isAfter(moment(date))
+}
 
-  return (
-    matchDate.year() == today.year() &&
-    matchDate.dayOfYear() > today.dayOfYear()
-  )
+function isAfterToday(match) {
+  return isAfter(match, moment())
 }
 
 const printMatch = widths => match => {
@@ -40,12 +46,12 @@ const printMatch = widths => match => {
   const home = `${hGoals} ${hTeam.padEnd(widths.home, ' ')}`
 
   const { country: aTeam, goals: aGoals } = match.away_team
-  const away = `${aTeam.padStart(widths.away, ' ')} ${aGoals}`
+  const away = `${aTeam.padStart(widths.home, ' ')} ${aGoals}`
 
   console.log(`${home} VS ${away}`)
 }
 
-const printMatchTime = widths => match => {
+const matchTime = widths => match => {
   const { datetime } = match
   const hour = moment(datetime).format('HH:mm')
 
@@ -54,7 +60,11 @@ const printMatchTime = widths => match => {
 
   const { country: aTeam } = match.away_team
 
-  console.log(`${hour} ${home} VS ${aTeam}`)
+  return `${hour} ${home} VS ${aTeam}`
+}
+
+const printMatchTime = widths => match => {
+  console.log(matchTime(widths)(match))
 }
 
 const calculateWidths = matches =>
@@ -72,7 +82,37 @@ const calculateWidths = matches =>
     { home: 0, away: 0 },
   )
 
-async function main() {
+function matchesWithTime(matches, date) {
+  const nextMatches = matches
+    .filter(match => isAfter(match, date))
+    .sort((m1, m2) => new Date(m1.datetime) - new Date(m2.datetime))
+    .filter((match, _, [nextMatch]) => matchSameDay(match, nextMatch))
+
+  const nextMatch = nextMatches[0]
+
+  const widths = calculateWidths(nextMatches)
+
+  let output = nextMatches.length
+    ? `Next Matches ${friendlyDateStr(nextMatch)}:`
+    : ''
+
+  output = nextMatches.reduce(
+    (out, match) => `${out}\n${matchTime(widths)(match)}`,
+    output,
+  )
+
+  return output
+}
+
+function friendlyDateStr(match) {
+  return isToday(match)
+    ? 'today'
+    : isTomorrow(match)
+      ? 'tomorrow'
+      : moment(match.datetime).format('MMM DD')
+}
+
+async function main({ debug }) {
   const spinner = ora('Loading matches')
 
   spinner.start()
@@ -97,42 +137,32 @@ async function main() {
       console.log('FINI'.padStart(widths.home + 4, ' ') + 'SHED')
       finishedMatches.forEach(printMatch(widths))
     }
-    if (finishedMatches.length && inProgressMatches.length) {
-      console.log('')
-    }
+
+    finishedMatches.length && inProgressMatches.length && console.log('')
+
     if (inProgressMatches.length) {
       console.log('IN PRO'.padStart(widths.home + 5, ' ') + 'GRESS')
       inProgressMatches.forEach(printMatch(widths))
     }
 
-    if (!inProgressMatches.length) {
-      const matchesAfterToday = matches
-        .filter(afterToday)
-        .sort((m1, m2) => new Date(m1.datetime) - new Date(m2.datetime))
+    // TODO: if no matches today and/or tomorrow find next day
+    const todayMatchesOutput = matchesWithTime(matches, moment())
+    const tomorrowMatchesOutput = matchesWithTime(
+      matches,
+      moment().add(1, 'day'),
+    )
 
-      const nextMatch = matchesAfterToday[0]
+    ;(todayMatchesOutput ||
+      tomorrowMatchesOutput ||
+      finishedMatches.length ||
+      inProgressMatches.length) &&
+      console.log()
 
-      const nextMatches = matchesAfterToday.filter(match =>
-        matchSameDay(match, nextMatch),
-      )
-
-      const widths = calculateWidths(nextMatches)
-
-      const date = moment(nextMatch.datetime)
-      const dateStr = isTomorrow(nextMatch) ? 'Tomorrow' : date.format('MMM DD')
-
-      console.log('')
-      console.log(`Next Matches (${dateStr}):`)
-
-      nextMatches.forEach(printMatchTime(widths))
-    }
-
-    if (!finishedMatches.length && !inProgressMatches.length) {
-      console.log('No matches today')
-    }
+    todayMatchesOutput && console.log(todayMatchesOutput)
+    todayMatchesOutput && tomorrowMatchesOutput && console.log()
+    tomorrowMatchesOutput && console.log(tomorrowMatchesOutput)
   } catch (e) {
     spinner.fail('Ups! Something went wrong.')
+    debug && console.log(e)
   }
 }
-
-main()

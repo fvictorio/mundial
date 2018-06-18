@@ -114,11 +114,12 @@ function friendlyDateStr(match) {
 
 async function main({ debug }) {
   const spinner = ora({
-    text: 'Loading matches',
+    text: 'Loading matches...',
     spinner: {
       interval: 160,
-      frames: ['⚽   ', ' ⚽  ', '  ⚽ ', '   ⚽']
-    }
+      frames: ['⚽   ', ' ⚽  ', '  ⚽ ', '   ⚽'],
+    },
+    color: 'white'
   })
 
   spinner.start()

@@ -23,3 +23,8 @@ npx mundial
 ```
 npx mundial | npx parrotsay
 ```
+
+# Acknowledgements
+
+This utility is based on applying Atwood's law to a python snippet by
+@lgenzelis.

@@ -26,4 +26,4 @@ npx mundial | npx parrotsay
 
 # Acknowledgements
 
-This utility is based on applying Atwood's law to a python snippet by [@lgenzelis](https://github.com/lgenzelis).
+This utility is based on applying Atwood's Law to a python snippet by [@lgenzelis](https://github.com/lgenzelis).

@@ -46,7 +46,7 @@ const printMatch = widths => match => {
   const home = `${hGoals} ${hTeam.padEnd(widths.home, ' ')}`
 
   const { country: aTeam, goals: aGoals } = match.away_team
-  const away = `${aTeam.padStart(widths.home, ' ')} ${aGoals}`
+  const away = `${aTeam.padStart(widths.away, ' ')} ${aGoals}`
 
   console.log(`${home} VS ${away}`)
 }
@@ -116,10 +116,10 @@ async function main({ debug }) {
   const spinner = ora({
     text: 'Loading matches...',
     spinner: {
-      interval: 160,
-      frames: ['⚽   ', ' ⚽  ', '  ⚽ ', '   ⚽'],
+      interval: 150,
+      frames: ['⚽   ', ' ⚽  ', '  ⚽ ', '   ⚽', '  ⚽ ', ' ⚽  '],
     },
-    color: 'white'
+    color: 'white',
   })
 
   spinner.start()
@@ -136,19 +136,19 @@ async function main({ debug }) {
       match => match.status === 'in progress',
     )
 
-    const widths = calculateWidths(todayMatches)
+    const widths = calculateWidths([...finishedMatches, ...inProgressMatches])
 
     spinner.stop()
 
     if (finishedMatches.length) {
-      console.log('FINI'.padStart(widths.home + 4, ' ') + 'SHED')
+      console.log('FINISHED')
       finishedMatches.forEach(printMatch(widths))
     }
 
     finishedMatches.length && inProgressMatches.length && console.log('')
 
     if (inProgressMatches.length) {
-      console.log('IN PRO'.padStart(widths.home + 5, ' ') + 'GRESS')
+      console.log('IN PROGRESS')
       inProgressMatches.forEach(printMatch(widths))
     }
 
@@ -158,7 +158,6 @@ async function main({ debug }) {
       matches,
       moment().add(1, 'day'),
     )
-
     ;(todayMatchesOutput ||
       tomorrowMatchesOutput ||
       finishedMatches.length ||

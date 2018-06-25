@@ -12,7 +12,9 @@ main(config)
 // -------------------------------------
 
 function sameDay(m1, m2) {
-  return m1.isSame(m2, 'day')
+  return (
+    m1.year() == m2.year() && m1.month() == m2.month() && m1.date() == m2.date()
+  )
 }
 
 function matchSameDay(match1, match2) {
@@ -133,7 +135,8 @@ async function main({ debug }) {
       match => match.status === 'completed',
     )
     const inProgressMatches = todayMatches.filter(
-      match => match.status === 'in progress',
+      match =>
+        match.status === 'in progress' || match.status === 'pending_correction',
     )
 
     const widths = calculateWidths([...finishedMatches, ...inProgressMatches])
